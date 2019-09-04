@@ -354,16 +354,20 @@ build_sources()
 }
 
 pushd "$build_base"
-#GALERA_REV="$(svnversion | sed s/\:/,/g)"
-#if [ "$GALERA_REV" == "exported" ]
-#then
-    GALERA_REV=$(git log --pretty=oneline | wc -l) || \
-    GALERA_REV=$(bzr revno --tree -q)              || \
-    GALERA_REV=$(svn info >&/dev/null && svnversion | sed s/\:/,/g) || \
-    GALERA_REV="XXXX"
-    # trim spaces (sed is not working on Solaris, so using bash built-in)
-    GALERA_REV=${GALERA_REV//[[:space:]]/}
-#fi
+
+# Read the wsrep_provider_version (specifically the galera commit for the
+# current release) from the GALERA-REVISION file instead of trying to
+# obtain it directly from the SCM system
+#
+if [[ ! -r "GALERA-REVISION" ]]; then
+    echo "Error: Cannot find/read the GALERA-REVISION file"
+    exit 1
+fi
+GALERA_REV=$(cat GALERA-REVISION)
+
+# trim spaces (sed is not working on Solaris, so using bash built-in)
+GALERA_REV=${GALERA_REV//[[:space:]]/}
+
 popd
 
 #if [ -z "$RELEASE" ]
